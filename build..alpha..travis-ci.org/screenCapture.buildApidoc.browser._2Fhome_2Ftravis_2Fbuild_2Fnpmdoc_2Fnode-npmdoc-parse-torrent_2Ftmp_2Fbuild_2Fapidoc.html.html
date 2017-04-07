@@ -1,0 +1,298 @@
+<html><head></head><body><div class="apidocDiv">
+<style>
+/*csslint
+*/
+.apidocDiv {
+    background: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.apidocDiv a[href] {
+    color: #33f;
+    font-weight: bold;
+    text-decoration: none;
+}
+.apidocDiv a[href]:hover {
+    text-decoration: underline;
+}
+.apidocCodeCommentSpan {
+    background: #bbf;
+    color: #000;
+    display: block;
+}
+.apidocCodeKeywordSpan {
+    color: #d00;
+    font-weight: bold;
+}
+.apidocCodePre {
+    background: #eef;
+    border: 1px solid;
+    color: #777;
+    padding: 5px;
+    white-space: pre-wrap;
+}
+.apidocFooterDiv {
+    margin-top: 20px;
+    text-align: center;
+}
+.apidocModuleLi {
+    margin-top: 10px;
+}
+.apidocSectionDiv {
+    border-top: 1px solid;
+    margin-top: 20px;
+}
+.apidocSignatureSpan {
+    color: #777;
+    font-weight: bold;
+}
+</style>
+<h1>api documentation for
+    <a href="https://github.com/feross/parse-torrent">parse-torrent (v5.8.2)</a>
+</h1>
+<h4>Parse a torrent identifier (magnet uri, .torrent file, info hash)</h4>
+<div class="apidocSectionDiv"><a href="#apidoc.tableOfContents" id="apidoc.tableOfContents"><h1>table of contents</h1></a><ol>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.parse-torrent">module parse-torrent</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.parse-torrent.remote">
+            function <span class="apidocSignatureSpan">parse-torrent.</span>remote
+            <span class="apidocSignatureSpan">(torrentId, cb)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.parse-torrent.toMagnetURI">
+            function <span class="apidocSignatureSpan">parse-torrent.</span>toMagnetURI
+            <span class="apidocSignatureSpan">(obj)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.parse-torrent.toTorrentFile">
+            function <span class="apidocSignatureSpan">parse-torrent.</span>toTorrentFile
+            <span class="apidocSignatureSpan">(parsed)</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+</ol></div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.parse-torrent" id="apidoc.module.parse-torrent">module parse-torrent</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.parse-torrent.remote" id="apidoc.element.parse-torrent.remote">
+        function <span class="apidocSignatureSpan">parse-torrent.</span>remote
+        <span class="apidocSignatureSpan">(torrentId, cb)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">function parseTorrentRemote(torrentId, cb) {
+  var parsedTorrent
+  if (typeof cb !== 'function') throw new Error('second argument must be a Function')
+
+  try {
+    parsedTorrent = parseTorrent(torrentId)
+  } catch (err) {
+    // If torrent fails to parse, it could be a Blob, http/https URL or
+    // filesystem path, so don't consider it an error yet.
+  }
+
+  if (parsedTorrent &amp;&amp; parsedTorrent.infoHash) {
+    process.nextTick(function () {
+      cb(null, parsedTorrent)
+    })
+  } else if (isBlob(torrentId)) {
+    blobToBuffer(torrentId, function (err, torrentBuf) {
+      if (err) return cb(new Error('Error converting Blob: ' + err.message))
+      parseOrThrow(torrentBuf)
+    })
+  } else if (typeof get === 'function' &amp;&amp; /^https?:/.test(torrentId)) {
+    // http, or https url to torrent file
+    get.concat({
+      url: torrentId,
+      timeout: 30 * 1000,
+      headers: { 'user-agent': 'WebTorrent (http://webtorrent.io)' }
+    }, function (err, res, torrentBuf) {
+      if (err) return cb(new Error('Error downloading torrent: ' + err.message))
+      parseOrThrow(torrentBuf)
+    })
+  } else if (typeof fs.readFile === 'function' &amp;&amp; typeof torrentId === 'string') {
+    // assume it's a filesystem path
+    fs.readFile(torrentId, function (err, torrentBuf) {
+      if (err) return cb(new Error('Invalid torrent identifier'))
+      parseOrThrow(torrentBuf)
+    })
+  } else {
+    process.nextTick(function () {
+      cb(new Error('Invalid torrent identifier'))
+    })
+  }
+
+  function parseOrThrow (torrentBuf) {
+    try {
+      parsedTorrent = parseTorrent(torrentBuf)
+    } catch (err) {
+      return cb(err)
+    }
+    if (parsedTorrent &amp;&amp; parsedTorrent.infoHash) cb(null, parsedTorrent)
+    else cb(new Error('Invalid torrent identifier'))
+  }
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+### remote torrents
+
+To support remote torrent identifiers (i.e. http/https links to .torrent files, or
+filesystem paths), as well as Blobs use the `parseTorrent.remote` function. It takes
+a callback since these torrent types require async operations:
+
+```js
+parseTorrent.<span class="apidocCodeKeywordSpan">remote</span>(torrentId, function (err, parsedTorrent) {
+  if (err) throw err
+  console.log(parsedTorrent)
+})
+```
+
+### command line program
+...</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.parse-torrent.toMagnetURI" id="apidoc.element.parse-torrent.toMagnetURI">
+        function <span class="apidocSignatureSpan">parse-torrent.</span>toMagnetURI
+        <span class="apidocSignatureSpan">(obj)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">function magnetURIEncode(obj) {
+  obj = extend(obj) // clone obj, so we can mutate it
+
+  // support using convenience names, in addition to spec names
+  // (example: `infoHash` for `xt`, `name` for `dn`)
+  if (obj.infoHashBuffer) obj.xt = 'urn:btih:' + obj.infoHashBuffer.toString('hex')
+  if (obj.infoHash) obj.xt = 'urn:btih:' + obj.infoHash
+  if (obj.name) obj.dn = obj.name
+  if (obj.keywords) obj.kt = obj.keywords
+  if (obj.announce) obj.tr = obj.announce
+  if (obj.urlList) {
+    obj.ws = obj.urlList
+    delete obj.as
+  }
+
+  var result = 'magnet:?'
+  Object.keys(obj)
+    .filter(function (key) {
+      return key.length === 2
+    })
+    .forEach(function (key, i) {
+      var values = Array.isArray(obj[key]) ? obj[key] : [ obj[key] ]
+      values.forEach(function (val, j) {
+        if ((i &gt; 0 || j &gt; 0) &amp;&amp; (key !== 'kt' || j === 0)) result += '&amp;'
+
+        if (key === 'dn') val = encodeURIComponent(val).replace(/%20/g, '+')
+        if (key === 'tr' || key === 'xs' || key === 'as' || key === 'ws') {
+          val = encodeURIComponent(val)
+        }
+        if (key === 'kt') val = encodeURIComponent(val)
+
+        if (key === 'kt' &amp;&amp; j &gt; 0) result += '+' + val
+        else result += key + '=' + val
+      })
+    })
+
+  return result
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+
+The reverse works too. To convert an object of keys/value to a magnet uri or .torrent file
+buffer, use `toMagnetURI` and `toTorrentFile`.
+
+```js
+var parseTorrent = require('parse-torrent')
+
+var uri = parseTorrent.<span class="apidocCodeKeywordSpan">toMagnetURI</span>({
+infoHash: 'd2474e86c95b19b8bcfdb92bc12c9d44667cfa36'
+})
+console.log(uri) // 'magnet:?xt=urn:btih:d2474e86c95b19b8bcfdb92bc12c9d44667cfa36'
+
+var buf = parseTorrent.toTorrentFile({
+info: {
+  /* ... */
+...</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.parse-torrent.toTorrentFile" id="apidoc.element.parse-torrent.toTorrentFile">
+        function <span class="apidocSignatureSpan">parse-torrent.</span>toTorrentFile
+        <span class="apidocSignatureSpan">(parsed)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">function encodeTorrentFile(parsed) {
+  var torrent = {
+    info: parsed.info
+  }
+
+  torrent['announce-list'] = (parsed.announce || []).map(function (url) {
+    if (!torrent.announce) torrent.announce = url
+    url = new Buffer(url, 'utf8')
+    return [ url ]
+  })
+
+  torrent['url-list'] = parsed.urlList || []
+
+  if (parsed.created) {
+    torrent['creation date'] = (parsed.created.getTime() / 1000) | 0
+  }
+
+  if (parsed.createdBy) {
+    torrent['created by'] = parsed.createdBy
+  }
+
+  if (parsed.comment) {
+    torrent.comment = parsed.comment
+  }
+
+  return bencode.encode(torrent)
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+var parseTorrent = require('parse-torrent')
+
+var uri = parseTorrent.toMagnetURI({
+  infoHash: 'd2474e86c95b19b8bcfdb92bc12c9d44667cfa36'
+})
+console.log(uri) // 'magnet:?xt=urn:btih:d2474e86c95b19b8bcfdb92bc12c9d44667cfa36'
+
+var buf = parseTorrent.<span class="apidocCodeKeywordSpan">toTorrentFile</span>({
+  info: {
+    /* ... */
+  }
+})
+console.log(buf)
+```
+...</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocFooterDiv">
+    [ this document was created with
+    <a href="https://github.com/kaizhu256/node-utility2" target="_blank">utility2</a>
+    ]
+</div>
+</div>
+</body></html>
