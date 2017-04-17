@@ -1,4 +1,4 @@
-<div class="apidocDiv">
+<html><head></head><body><div class="apidocDiv">
 <style>
 /*csslint
 */
@@ -47,17 +47,10 @@
 }
 </style>
 <h1>api documentation for
-    <a
-
-        href="https://github.com/webtorrent/parse-torrent#readme"
-
-    >parse-torrent (v5.8.3)</a>
+    <a href="https://github.com/webtorrent/parse-torrent#readme">parse-torrent (v5.8.3)</a>
 </h1>
 <h4>Parse a torrent identifier (magnet uri, .torrent file, info hash)</h4>
-<div class="apidocSectionDiv"><a
-    href="#apidoc.tableOfContents"
-    id="apidoc.tableOfContents"
-><h1>table of contents</h1></a><ol>
+<div class="apidocSectionDiv"><a href="#apidoc.tableOfContents" id="apidoc.tableOfContents"><h1>table of contents</h1></a><ol>
 
     <li class="apidocModuleLi"><a href="#apidoc.module.parse-torrent">module parse-torrent</a><ol>
 
@@ -174,28 +167,28 @@
     </h2>
     <ul>
     <li>description and source-code<pre class="apidocCodePre">function parseTorrent(torrentId) {
-  if (typeof torrentId === &#x27;string&#x27; &#x26;&#x26; /^(stream-)?magnet:/.test(torrentId)) {
+  if (typeof torrentId === 'string' &amp;&amp; /^(stream-)?magnet:/.test(torrentId)) {
     // magnet uri (string)
     return magnet(torrentId)
-  } else if (typeof torrentId === &#x27;string&#x27; &#x26;&#x26; (/^[a-f0-9]{40}$/i.test(torrentId) || /^[a-z2-7]{32}$/i.test(torrentId))) {
+  } else if (typeof torrentId === 'string' &amp;&amp; (/^[a-f0-9]{40}$/i.test(torrentId) || /^[a-z2-7]{32}$/i.test(torrentId))) {
     // info hash (hex/base-32 string)
-    return magnet(&#x27;magnet:?xt=urn:btih:&#x27; + torrentId)
-  } else if (Buffer.isBuffer(torrentId) &#x26;&#x26; torrentId.length === 20) {
+    return magnet('magnet:?xt=urn:btih:' + torrentId)
+  } else if (Buffer.isBuffer(torrentId) &amp;&amp; torrentId.length === 20) {
     // info hash (buffer)
-    return magnet(&#x27;magnet:?xt=urn:btih:&#x27; + torrentId.toString(&#x27;hex&#x27;))
+    return magnet('magnet:?xt=urn:btih:' + torrentId.toString('hex'))
   } else if (Buffer.isBuffer(torrentId)) {
     // .torrent file (buffer)
     return parseTorrentFile(torrentId) // might throw
-  } else if (torrentId &#x26;&#x26; torrentId.infoHash) {
+  } else if (torrentId &amp;&amp; torrentId.infoHash) {
     // parsed torrent (from `parse-torrent`, `parse-torrent-file`, or `magnet-uri`)
     if (!torrentId.announce) torrentId.announce = []
-    if (typeof torrentId.announce === &#x27;string&#x27;) {
+    if (typeof torrentId.announce === 'string') {
       torrentId.announce = [ torrentId.announce ]
     }
     if (!torrentId.urlList) torrentId.urlList = []
     return torrentId
   } else {
-    throw new Error(&#x27;Invalid torrent identifier&#x27;)
+    throw new Error('Invalid torrent identifier')
   }
 }</pre></li>
     <li>example usage<pre class="apidocCodePre">n/a</pre></li>
@@ -212,43 +205,43 @@
     <ul>
     <li>description and source-code<pre class="apidocCodePre">function parseTorrentRemote(torrentId, cb) {
   var parsedTorrent
-  if (typeof cb !== &#x27;function&#x27;) throw new Error(&#x27;second argument must be a Function&#x27;)
+  if (typeof cb !== 'function') throw new Error('second argument must be a Function')
 
   try {
     parsedTorrent = parseTorrent(torrentId)
   } catch (err) {
     // If torrent fails to parse, it could be a Blob, http/https URL or
-    // filesystem path, so don&#x27;t consider it an error yet.
+    // filesystem path, so don't consider it an error yet.
   }
 
-  if (parsedTorrent &#x26;&#x26; parsedTorrent.infoHash) {
+  if (parsedTorrent &amp;&amp; parsedTorrent.infoHash) {
     process.nextTick(function () {
       cb(null, parsedTorrent)
     })
   } else if (isBlob(torrentId)) {
     blobToBuffer(torrentId, function (err, torrentBuf) {
-      if (err) return cb(new Error(&#x27;Error converting Blob: &#x27; + err.message))
+      if (err) return cb(new Error('Error converting Blob: ' + err.message))
       parseOrThrow(torrentBuf)
     })
-  } else if (typeof get === &#x27;function&#x27; &#x26;&#x26; /^https?:/.test(torrentId)) {
+  } else if (typeof get === 'function' &amp;&amp; /^https?:/.test(torrentId)) {
     // http, or https url to torrent file
     get.concat({
       url: torrentId,
       timeout: 30 * 1000,
-      headers: { &#x27;user-agent&#x27;: &#x27;WebTorrent (http://webtorrent.io)&#x27; }
+      headers: { 'user-agent': 'WebTorrent (http://webtorrent.io)' }
     }, function (err, res, torrentBuf) {
-      if (err) return cb(new Error(&#x27;Error downloading torrent: &#x27; + err.message))
+      if (err) return cb(new Error('Error downloading torrent: ' + err.message))
       parseOrThrow(torrentBuf)
     })
-  } else if (typeof fs.readFile === &#x27;function&#x27; &#x26;&#x26; typeof torrentId === &#x27;string&#x27;) {
-    // assume it&#x27;s a filesystem path
+  } else if (typeof fs.readFile === 'function' &amp;&amp; typeof torrentId === 'string') {
+    // assume it's a filesystem path
     fs.readFile(torrentId, function (err, torrentBuf) {
-      if (err) return cb(new Error(&#x27;Invalid torrent identifier&#x27;))
+      if (err) return cb(new Error('Invalid torrent identifier'))
       parseOrThrow(torrentBuf)
     })
   } else {
     process.nextTick(function () {
-      cb(new Error(&#x27;Invalid torrent identifier&#x27;))
+      cb(new Error('Invalid torrent identifier'))
     })
   }
 
@@ -258,8 +251,8 @@
     } catch (err) {
       return cb(err)
     }
-    if (parsedTorrent &#x26;&#x26; parsedTorrent.infoHash) cb(null, parsedTorrent)
-    else cb(new Error(&#x27;Invalid torrent identifier&#x27;))
+    if (parsedTorrent &amp;&amp; parsedTorrent.infoHash) cb(null, parsedTorrent)
+    else cb(new Error('Invalid torrent identifier'))
   }
 }</pre></li>
     <li>example usage<pre class="apidocCodePre">...
@@ -294,8 +287,8 @@ parseTorrent.<span class="apidocCodeKeywordSpan">remote</span>(torrentId, functi
 
   // support using convenience names, in addition to spec names
   // (example: `infoHash` for `xt`, `name` for `dn`)
-  if (obj.infoHashBuffer) obj.xt = &#x27;urn:btih:&#x27; + obj.infoHashBuffer.toString(&#x27;hex&#x27;)
-  if (obj.infoHash) obj.xt = &#x27;urn:btih:&#x27; + obj.infoHash
+  if (obj.infoHashBuffer) obj.xt = 'urn:btih:' + obj.infoHashBuffer.toString('hex')
+  if (obj.infoHash) obj.xt = 'urn:btih:' + obj.infoHash
   if (obj.name) obj.dn = obj.name
   if (obj.keywords) obj.kt = obj.keywords
   if (obj.announce) obj.tr = obj.announce
@@ -304,7 +297,7 @@ parseTorrent.<span class="apidocCodeKeywordSpan">remote</span>(torrentId, functi
     delete obj.as
   }
 
-  var result = &#x27;magnet:?&#x27;
+  var result = 'magnet:?'
   Object.keys(obj)
     .filter(function (key) {
       return key.length === 2
@@ -312,16 +305,16 @@ parseTorrent.<span class="apidocCodeKeywordSpan">remote</span>(torrentId, functi
     .forEach(function (key, i) {
       var values = Array.isArray(obj[key]) ? obj[key] : [ obj[key] ]
       values.forEach(function (val, j) {
-        if ((i &#x3e; 0 || j &#x3e; 0) &#x26;&#x26; (key !== &#x27;kt&#x27; || j === 0)) result += &#x27;&#x26;&#x27;
+        if ((i &gt; 0 || j &gt; 0) &amp;&amp; (key !== 'kt' || j === 0)) result += '&amp;'
 
-        if (key === &#x27;dn&#x27;) val = encodeURIComponent(val).replace(/%20/g, &#x27;+&#x27;)
-        if (key === &#x27;tr&#x27; || key === &#x27;xs&#x27; || key === &#x27;as&#x27; || key === &#x27;ws&#x27;) {
+        if (key === 'dn') val = encodeURIComponent(val).replace(/%20/g, '+')
+        if (key === 'tr' || key === 'xs' || key === 'as' || key === 'ws') {
           val = encodeURIComponent(val)
         }
-        if (key === &#x27;kt&#x27;) val = encodeURIComponent(val)
+        if (key === 'kt') val = encodeURIComponent(val)
 
-        if (key === &#x27;kt&#x27; &#x26;&#x26; j &#x3e; 0) result += &#x27;+&#x27; + val
-        else result += key + &#x27;=&#x27; + val
+        if (key === 'kt' &amp;&amp; j &gt; 0) result += '+' + val
+        else result += key + '=' + val
       })
     })
 
@@ -333,12 +326,12 @@ The reverse works too. To convert an object of keys/value to a magnet uri or .to
 buffer, use `toMagnetURI` and `toTorrentFile`.
 
 ```js
-var parseTorrent = require(&#x27;parse-torrent&#x27;)
+var parseTorrent = require('parse-torrent')
 
 var uri = parseTorrent.<span class="apidocCodeKeywordSpan">toMagnetURI</span>({
-infoHash: &#x27;d2474e86c95b19b8bcfdb92bc12c9d44667cfa36&#x27;
+infoHash: 'd2474e86c95b19b8bcfdb92bc12c9d44667cfa36'
 })
-console.log(uri) // &#x27;magnet:?xt=urn:btih:d2474e86c95b19b8bcfdb92bc12c9d44667cfa36&#x27;
+console.log(uri) // 'magnet:?xt=urn:btih:d2474e86c95b19b8bcfdb92bc12c9d44667cfa36'
 
 var buf = parseTorrent.toTorrentFile({
 info: {
@@ -361,20 +354,20 @@ info: {
     <li>example usage<pre class="apidocCodePre">...
   // magnet uri (string)
   return magnet(torrentId)
-} else if (typeof torrentId === &#x27;string&#x27; &#x26;&#x26; (/^[a-f0-9]{40}$/i.test(torrentId) || /^[a-z2-7]{32}$/i.test(torrentId
+} else if (typeof torrentId === 'string' &amp;&amp; (/^[a-f0-9]{40}$/i.test(torrentId) || /^[a-z2-7]{32}$/i.test(torrentId
 ))) {
   // info hash (hex/base-32 string)
-  return magnet(&#x27;magnet:?xt=urn:btih:&#x27; + torrentId)
-} else if (Buffer.isBuffer(torrentId) &#x26;&#x26; torrentId.length === 20) {
+  return magnet('magnet:?xt=urn:btih:' + torrentId)
+} else if (Buffer.isBuffer(torrentId) &amp;&amp; torrentId.length === 20) {
   // info hash (buffer)
-  return magnet(&#x27;magnet:?xt=urn:btih:&#x27; + torrentId.<span class="apidocCodeKeywordSpan">toString</span>(&#x27;hex&#x27;))
+  return magnet('magnet:?xt=urn:btih:' + torrentId.<span class="apidocCodeKeywordSpan">toString</span>('hex'))
 } else if (Buffer.isBuffer(torrentId)) {
   // .torrent file (buffer)
   return parseTorrentFile(torrentId) // might throw
-} else if (torrentId &#x26;&#x26; torrentId.infoHash) {
+} else if (torrentId &amp;&amp; torrentId.infoHash) {
   // parsed torrent (from `parse-torrent`, `parse-torrent-file`, or `magnet-uri`)
   if (!torrentId.announce) torrentId.announce = []
-  if (typeof torrentId.announce === &#x27;string&#x27;) {
+  if (typeof torrentId.announce === 'string') {
 ...</pre></li>
     </ul>
 
@@ -392,20 +385,20 @@ info: {
     info: parsed.info
   }
 
-  torrent[&#x27;announce-list&#x27;] = (parsed.announce || []).map(function (url) {
+  torrent['announce-list'] = (parsed.announce || []).map(function (url) {
     if (!torrent.announce) torrent.announce = url
-    url = new Buffer(url, &#x27;utf8&#x27;)
+    url = new Buffer(url, 'utf8')
     return [ url ]
   })
 
-  torrent[&#x27;url-list&#x27;] = parsed.urlList || []
+  torrent['url-list'] = parsed.urlList || []
 
   if (parsed.created) {
-    torrent[&#x27;creation date&#x27;] = (parsed.created.getTime() / 1000) | 0
+    torrent['creation date'] = (parsed.created.getTime() / 1000) | 0
   }
 
   if (parsed.createdBy) {
-    torrent[&#x27;created by&#x27;] = parsed.createdBy
+    torrent['created by'] = parsed.createdBy
   }
 
   if (parsed.comment) {
@@ -415,12 +408,12 @@ info: {
   return bencode.encode(torrent)
 }</pre></li>
     <li>example usage<pre class="apidocCodePre">...
-var parseTorrent = require(&#x27;parse-torrent&#x27;)
+var parseTorrent = require('parse-torrent')
 
 var uri = parseTorrent.toMagnetURI({
-  infoHash: &#x27;d2474e86c95b19b8bcfdb92bc12c9d44667cfa36&#x27;
+  infoHash: 'd2474e86c95b19b8bcfdb92bc12c9d44667cfa36'
 })
-console.log(uri) // &#x27;magnet:?xt=urn:btih:d2474e86c95b19b8bcfdb92bc12c9d44667cfa36&#x27;
+console.log(uri) // 'magnet:?xt=urn:btih:d2474e86c95b19b8bcfdb92bc12c9d44667cfa36'
 
 var buf = parseTorrent.<span class="apidocCodeKeywordSpan">toTorrentFile</span>({
   info: {
@@ -448,43 +441,43 @@ console.log(buf)
     <ul>
     <li>description and source-code<pre class="apidocCodePre">function parseTorrentRemote(torrentId, cb) {
   var parsedTorrent
-  if (typeof cb !== &#x27;function&#x27;) throw new Error(&#x27;second argument must be a Function&#x27;)
+  if (typeof cb !== 'function') throw new Error('second argument must be a Function')
 
   try {
     parsedTorrent = parseTorrent(torrentId)
   } catch (err) {
     // If torrent fails to parse, it could be a Blob, http/https URL or
-    // filesystem path, so don&#x27;t consider it an error yet.
+    // filesystem path, so don't consider it an error yet.
   }
 
-  if (parsedTorrent &#x26;&#x26; parsedTorrent.infoHash) {
+  if (parsedTorrent &amp;&amp; parsedTorrent.infoHash) {
     process.nextTick(function () {
       cb(null, parsedTorrent)
     })
   } else if (isBlob(torrentId)) {
     blobToBuffer(torrentId, function (err, torrentBuf) {
-      if (err) return cb(new Error(&#x27;Error converting Blob: &#x27; + err.message))
+      if (err) return cb(new Error('Error converting Blob: ' + err.message))
       parseOrThrow(torrentBuf)
     })
-  } else if (typeof get === &#x27;function&#x27; &#x26;&#x26; /^https?:/.test(torrentId)) {
+  } else if (typeof get === 'function' &amp;&amp; /^https?:/.test(torrentId)) {
     // http, or https url to torrent file
     get.concat({
       url: torrentId,
       timeout: 30 * 1000,
-      headers: { &#x27;user-agent&#x27;: &#x27;WebTorrent (http://webtorrent.io)&#x27; }
+      headers: { 'user-agent': 'WebTorrent (http://webtorrent.io)' }
     }, function (err, res, torrentBuf) {
-      if (err) return cb(new Error(&#x27;Error downloading torrent: &#x27; + err.message))
+      if (err) return cb(new Error('Error downloading torrent: ' + err.message))
       parseOrThrow(torrentBuf)
     })
-  } else if (typeof fs.readFile === &#x27;function&#x27; &#x26;&#x26; typeof torrentId === &#x27;string&#x27;) {
-    // assume it&#x27;s a filesystem path
+  } else if (typeof fs.readFile === 'function' &amp;&amp; typeof torrentId === 'string') {
+    // assume it's a filesystem path
     fs.readFile(torrentId, function (err, torrentBuf) {
-      if (err) return cb(new Error(&#x27;Invalid torrent identifier&#x27;))
+      if (err) return cb(new Error('Invalid torrent identifier'))
       parseOrThrow(torrentBuf)
     })
   } else {
     process.nextTick(function () {
-      cb(new Error(&#x27;Invalid torrent identifier&#x27;))
+      cb(new Error('Invalid torrent identifier'))
     })
   }
 
@@ -494,8 +487,8 @@ console.log(buf)
     } catch (err) {
       return cb(err)
     }
-    if (parsedTorrent &#x26;&#x26; parsedTorrent.infoHash) cb(null, parsedTorrent)
-    else cb(new Error(&#x27;Invalid torrent identifier&#x27;))
+    if (parsedTorrent &amp;&amp; parsedTorrent.infoHash) cb(null, parsedTorrent)
+    else cb(new Error('Invalid torrent identifier'))
   }
 }</pre></li>
     <li>example usage<pre class="apidocCodePre">...
@@ -535,8 +528,8 @@ parseTorrent.<span class="apidocCodeKeywordSpan">remote</span>(torrentId, functi
 
   // support using convenience names, in addition to spec names
   // (example: `infoHash` for `xt`, `name` for `dn`)
-  if (obj.infoHashBuffer) obj.xt = &#x27;urn:btih:&#x27; + obj.infoHashBuffer.toString(&#x27;hex&#x27;)
-  if (obj.infoHash) obj.xt = &#x27;urn:btih:&#x27; + obj.infoHash
+  if (obj.infoHashBuffer) obj.xt = 'urn:btih:' + obj.infoHashBuffer.toString('hex')
+  if (obj.infoHash) obj.xt = 'urn:btih:' + obj.infoHash
   if (obj.name) obj.dn = obj.name
   if (obj.keywords) obj.kt = obj.keywords
   if (obj.announce) obj.tr = obj.announce
@@ -545,7 +538,7 @@ parseTorrent.<span class="apidocCodeKeywordSpan">remote</span>(torrentId, functi
     delete obj.as
   }
 
-  var result = &#x27;magnet:?&#x27;
+  var result = 'magnet:?'
   Object.keys(obj)
     .filter(function (key) {
       return key.length === 2
@@ -553,16 +546,16 @@ parseTorrent.<span class="apidocCodeKeywordSpan">remote</span>(torrentId, functi
     .forEach(function (key, i) {
       var values = Array.isArray(obj[key]) ? obj[key] : [ obj[key] ]
       values.forEach(function (val, j) {
-        if ((i &#x3e; 0 || j &#x3e; 0) &#x26;&#x26; (key !== &#x27;kt&#x27; || j === 0)) result += &#x27;&#x26;&#x27;
+        if ((i &gt; 0 || j &gt; 0) &amp;&amp; (key !== 'kt' || j === 0)) result += '&amp;'
 
-        if (key === &#x27;dn&#x27;) val = encodeURIComponent(val).replace(/%20/g, &#x27;+&#x27;)
-        if (key === &#x27;tr&#x27; || key === &#x27;xs&#x27; || key === &#x27;as&#x27; || key === &#x27;ws&#x27;) {
+        if (key === 'dn') val = encodeURIComponent(val).replace(/%20/g, '+')
+        if (key === 'tr' || key === 'xs' || key === 'as' || key === 'ws') {
           val = encodeURIComponent(val)
         }
-        if (key === &#x27;kt&#x27;) val = encodeURIComponent(val)
+        if (key === 'kt') val = encodeURIComponent(val)
 
-        if (key === &#x27;kt&#x27; &#x26;&#x26; j &#x3e; 0) result += &#x27;+&#x27; + val
-        else result += key + &#x27;=&#x27; + val
+        if (key === 'kt' &amp;&amp; j &gt; 0) result += '+' + val
+        else result += key + '=' + val
       })
     })
 
@@ -574,12 +567,12 @@ The reverse works too. To convert an object of keys/value to a magnet uri or .to
 buffer, use `toMagnetURI` and `toTorrentFile`.
 
 ```js
-var parseTorrent = require(&#x27;parse-torrent&#x27;)
+var parseTorrent = require('parse-torrent')
 
 var uri = parseTorrent.<span class="apidocCodeKeywordSpan">toMagnetURI</span>({
-infoHash: &#x27;d2474e86c95b19b8bcfdb92bc12c9d44667cfa36&#x27;
+infoHash: 'd2474e86c95b19b8bcfdb92bc12c9d44667cfa36'
 })
-console.log(uri) // &#x27;magnet:?xt=urn:btih:d2474e86c95b19b8bcfdb92bc12c9d44667cfa36&#x27;
+console.log(uri) // 'magnet:?xt=urn:btih:d2474e86c95b19b8bcfdb92bc12c9d44667cfa36'
 
 var buf = parseTorrent.toTorrentFile({
 info: {
@@ -605,20 +598,20 @@ info: {
     <li>example usage<pre class="apidocCodePre">...
   // magnet uri (string)
   return magnet(torrentId)
-} else if (typeof torrentId === &#x27;string&#x27; &#x26;&#x26; (/^[a-f0-9]{40}$/i.test(torrentId) || /^[a-z2-7]{32}$/i.test(torrentId
+} else if (typeof torrentId === 'string' &amp;&amp; (/^[a-f0-9]{40}$/i.test(torrentId) || /^[a-z2-7]{32}$/i.test(torrentId
 ))) {
   // info hash (hex/base-32 string)
-  return magnet(&#x27;magnet:?xt=urn:btih:&#x27; + torrentId)
-} else if (Buffer.isBuffer(torrentId) &#x26;&#x26; torrentId.length === 20) {
+  return magnet('magnet:?xt=urn:btih:' + torrentId)
+} else if (Buffer.isBuffer(torrentId) &amp;&amp; torrentId.length === 20) {
   // info hash (buffer)
-  return magnet(&#x27;magnet:?xt=urn:btih:&#x27; + torrentId.<span class="apidocCodeKeywordSpan">toString</span>(&#x27;hex&#x27;))
+  return magnet('magnet:?xt=urn:btih:' + torrentId.<span class="apidocCodeKeywordSpan">toString</span>('hex'))
 } else if (Buffer.isBuffer(torrentId)) {
   // .torrent file (buffer)
   return parseTorrentFile(torrentId) // might throw
-} else if (torrentId &#x26;&#x26; torrentId.infoHash) {
+} else if (torrentId &amp;&amp; torrentId.infoHash) {
   // parsed torrent (from `parse-torrent`, `parse-torrent-file`, or `magnet-uri`)
   if (!torrentId.announce) torrentId.announce = []
-  if (typeof torrentId.announce === &#x27;string&#x27;) {
+  if (typeof torrentId.announce === 'string') {
 ...</pre></li>
     </ul>
 
@@ -641,20 +634,20 @@ info: {
     info: parsed.info
   }
 
-  torrent[&#x27;announce-list&#x27;] = (parsed.announce || []).map(function (url) {
+  torrent['announce-list'] = (parsed.announce || []).map(function (url) {
     if (!torrent.announce) torrent.announce = url
-    url = new Buffer(url, &#x27;utf8&#x27;)
+    url = new Buffer(url, 'utf8')
     return [ url ]
   })
 
-  torrent[&#x27;url-list&#x27;] = parsed.urlList || []
+  torrent['url-list'] = parsed.urlList || []
 
   if (parsed.created) {
-    torrent[&#x27;creation date&#x27;] = (parsed.created.getTime() / 1000) | 0
+    torrent['creation date'] = (parsed.created.getTime() / 1000) | 0
   }
 
   if (parsed.createdBy) {
-    torrent[&#x27;created by&#x27;] = parsed.createdBy
+    torrent['created by'] = parsed.createdBy
   }
 
   if (parsed.comment) {
@@ -664,12 +657,12 @@ info: {
   return bencode.encode(torrent)
 }</pre></li>
     <li>example usage<pre class="apidocCodePre">...
-var parseTorrent = require(&#x27;parse-torrent&#x27;)
+var parseTorrent = require('parse-torrent')
 
 var uri = parseTorrent.toMagnetURI({
-  infoHash: &#x27;d2474e86c95b19b8bcfdb92bc12c9d44667cfa36&#x27;
+  infoHash: 'd2474e86c95b19b8bcfdb92bc12c9d44667cfa36'
 })
-console.log(uri) // &#x27;magnet:?xt=urn:btih:d2474e86c95b19b8bcfdb92bc12c9d44667cfa36&#x27;
+console.log(uri) // 'magnet:?xt=urn:btih:d2474e86c95b19b8bcfdb92bc12c9d44667cfa36'
 
 var buf = parseTorrent.<span class="apidocCodeKeywordSpan">toTorrentFile</span>({
   info: {
@@ -690,3 +683,4 @@ console.log(buf)
     ]
 </div>
 </div>
+</body></html>
