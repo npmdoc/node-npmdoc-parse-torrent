@@ -1,4 +1,7 @@
-# api documentation for  [parse-torrent (v5.8.3)](https://github.com/webtorrent/parse-torrent#readme)  [![npm package](https://img.shields.io/npm/v/npmdoc-parse-torrent.svg?style=flat-square)](https://www.npmjs.org/package/npmdoc-parse-torrent) [![travis-ci.org build-status](https://api.travis-ci.org/npmdoc/node-npmdoc-parse-torrent.svg)](https://travis-ci.org/npmdoc/node-npmdoc-parse-torrent)
+# npmdoc-parse-torrent
+
+#### basic api documentation for  [parse-torrent (v5.8.3)](https://github.com/webtorrent/parse-torrent#readme)  [![npm package](https://img.shields.io/npm/v/npmdoc-parse-torrent.svg?style=flat-square)](https://www.npmjs.org/package/npmdoc-parse-torrent) [![travis-ci.org build-status](https://api.travis-ci.org/npmdoc/node-npmdoc-parse-torrent.svg)](https://travis-ci.org/npmdoc/node-npmdoc-parse-torrent)
+
 #### Parse a torrent identifier (magnet uri, .torrent file, info hash)
 
 [![NPM](https://nodei.co/npm/parse-torrent.png?downloads=true&downloadRank=true&stars=true)](https://www.npmjs.com/package/parse-torrent)
